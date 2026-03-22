@@ -73,6 +73,14 @@ public class Point {
         return Math.sqrt(distanceSquared(other));
     }
 
+    /**
+     * Getter for the Double3 coordinates (for subclasses and package)
+     * @return the Double3 coordinates
+     */
+    public Double3 getXYZ() {
+        return _xyz;
+    }
+
     @Override
     public boolean equals(Object obj) {
         return this == obj
