@@ -6,7 +6,11 @@ import primitives.Point;
 import primitives.Ray;
 import primitives.Vector;
 
+/**
+ * Unit tests for geometries.impl.Cylinder class
+ */
 class CylinderTests {
+
     @Test
     void testGetNormal() {
         // Arrange: Cylinder along Z axis, radius 1, height 2
@@ -19,4 +23,8 @@ class CylinderTests {
         assertEquals(new Vector(1, 0, 0), normal, "Cylinder getNormal() gives wrong result");
         assertEquals(1, normal.length(), 1e-6, "Cylinder normal is not a unit vector");
     }
+
+
+
+
 }

@@ -14,21 +14,8 @@ public class Plane extends Geometry {
     /** The normal vector to the plane */
     private final Vector _normal;
 
-    /// constructor parameter
-    /**
-     * Constructor for plane from two points (יוצר מישור דרך שתי נקודות ווקטור עזר).
-     * @param p1 first point
-     * @param p2 second point
-     * @throws IllegalArgumentException if the points are collinear
-     */
-    public Plane(Point p1, Point p2) {
-        _p0 = p1;
-        Vector v1 = p2.subtract(p1);
-        // ניגש לרכיבים דרך _xyz._d1()/_d2()/_d3()
-        Vector v2 = (Math.abs(v1.getXYZ()._d1()) < Math.abs(v1.getXYZ()._d2())) ?
-                new Vector(1, 0, 0) : new Vector(0, 1, 0);
-        _normal = v1.crossProduct(v2).normalize();
-    }
+
+
 
      /**
      * Constructor for plane from three points.
