@@ -7,7 +7,7 @@ import primitives.Point;
  * Abstract base class for geometric objects in 3D space.
  * Provides common functionality for all geometries.
  */
-public abstract class Geometry {
+public abstract class Geometry extends Intersectable {
 
     /**
      * Returns the normal vector to the geometry at the specified point.

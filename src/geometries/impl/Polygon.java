@@ -76,4 +76,12 @@ public class Polygon extends Geometry {
 
    @Override
    public Vector getNormal(Point point) { return _plane.getNormal(point); }
+
+   /** Finds intersections of the polygon with a given ray.
+    * @param ray the ray to intersect with
+    * @return list of intersection points (null if no intersections)
+    */
+   @Override
+   public List<Point> findIntersections(Ray ray) {
+      return null;}
 }

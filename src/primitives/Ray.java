@@ -1,5 +1,7 @@
 package primitives;
 
+import static primitives.Util.isZero;
+
 /**
  * Represents a ray in a 3D Cartesian coordinate system.
  * A ray is defined by a starting point and a direction vector.
@@ -38,4 +40,14 @@ public class Ray {
     public Vector direction() {
         return _direction;
     }
+
+    public Point getPoint(double t)
+    {
+        if (isZero(t)) {
+            return _origin;
+        }
+        return _origin.add(_direction.scale(t));
+    }
+
+
 }

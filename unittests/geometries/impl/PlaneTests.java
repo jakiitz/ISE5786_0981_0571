@@ -69,4 +69,56 @@ class PlaneTests {
         assertThrows(IllegalArgumentException.class,
                 () -> new Plane(new Point(0,0,1), new Point(0,0,2), new Point(0,0,3)), ERROR_CONSTRUCTOR);
     }
+
+    /**
+     * Test method for {@link geometries.impl.Plane#findIntersections(Ray)}.
+     */
+    @Test
+    public void testFindIntersections() {
+        Plane pl = new Plane(new Point(0, 0, 1), new Vector(0, 0, 1));
+
+        // ============ Equivalence Partitions Tests =============
+        // EP01: Ray intersects the plane (1 point)
+        Ray ray1 = new Ray(new Point(0, 0, 0), new Vector(0, 0, 1));
+        var result1 = pl.findIntersections(ray1);
+        assertNotNull(result1, "Ray should intersect the plane");
+        assertEquals(1, result1.size(), "Should be 1 intersection point");
+        assertEquals(new Point(0, 0, 1), result1.get(0), "Incorrect intersection point");
+        // EP02: Ray does not intersect (0 points)
+        Ray ray2 = new Ray(new Point(0, 0, 0), new Vector(0, 1, 0));
+        assertNull(pl.findIntersections(ray2), "Ray should not intersect the plane");
+
+        //=================== Boundary Values Tests ==================
+        // BV01: Ray is parallel to the plane and lies in the plane (infinite points)
+        Ray ray3 = new Ray(new Point(0, 0, 1), new Vector(1, 0, 0));
+        assertNull(pl.findIntersections(ray3), "Ray lies in the plane, should return null (no single intersection point)");
+        // BV02: Ray is parallel to the plane and does not lie in the plane (0 points)
+        Ray ray4 = new Ray(new Point(0, 0, 2), new Vector(1, 0, 0));
+        assertNull(pl.findIntersections(ray4), "Ray is parallel and outside the plane, should return null");
+        // BV03: Ray is orthogonal to the plane and starts before the plane (1 point)
+        Ray ray5 = new Ray(new Point(0, 0, 0), new Vector(0, 0, 1));
+        var result5 = pl.findIntersections(ray5);
+        assertNotNull(result5, "Ray should intersect the plane");
+        assertEquals(1, result5.size(), "Should be 1 intersection point");
+        assertEquals(new Point(0, 0, 1), result5.get(0), "Incorrect intersection point");
+        // BV04: Ray is orthogonal to the plane and starts on the plane (1 point)
+        Ray ray6 = new Ray(new Point(0, 0, 1), new Vector(0, 0, 1));
+        var result6 = pl.findIntersections(ray6);
+        assertNull(result6, "Ray starts on the plane and goes away, should return null (no single intersection point)");
+         // BV05: Ray is orthogonal to the plane and starts after the plane (0 points)
+        Ray ray7 = new Ray(new Point(0, 0, 2), new Vector(0, 0, 1));
+        assertNull(pl.findIntersections(ray7), "Ray starts after the plane, should return null");
+
+        // BV06:  Ray is neither orthogonal nor parallel to the plane and starts on the plane (1 point)
+        Ray ray8 = new Ray(new Point(0, 0, 1), new Vector(1, 1, 1));
+        var result8 = pl.findIntersections(ray8);
+        assertNull(result8, "Ray starts on the plane and goes away, should return null (no single intersection point)");
+
+        // BV07:  Ray is neither orthogonal nor parallel to the plane and begins at the reference point of the plane (0 point)
+        Ray ray9 = new Ray(new Point(0, 0, 1), new Vector(1, 1, 1));
+        var result9 = pl.findIntersections(ray9);
+        assertNull(result9, "Ray starts at the reference point of the plane and goes away, should return null (no single intersection point)");
+
+
+    }
 }

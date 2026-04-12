@@ -2,6 +2,8 @@ package geometries.impl;
 
 import primitives.*;
 
+import java.util.List;
+
 /**
  * Class Tube represents an infinite cylinder.
  */
@@ -44,5 +46,15 @@ public class Tube extends RadialGeometry {
 
         // n = normalize(P - O)
         return point.subtract(o).normalize();
+    }
+
+    /**
+     * find the intersection points of the tube with a ray
+     * @param ray the ray to intersect with
+     * @return list of intersection points (null if no intersections)
+     */
+    @Override
+    public List<Point> findIntersections(Ray ray) {
+        return null;
     }
 }

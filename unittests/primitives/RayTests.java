@@ -58,4 +58,30 @@ class RayTests {
         assertEquals(expected, ray.direction(), "Direction getter failed");
         assertEquals(1, ray.direction().length(), DELTA, "Direction should be normalized");
     }
+
+    /**
+     * Test getPoint method.
+     */
+    @Test
+    void testGetPoint() {
+        // ============ Equivalence Partitions Tests ==============
+        // TC01: Get point at t>0 should return correct point
+        Ray ray = new Ray(P1, V1);
+        double t = 2.0;
+        Point expected = P1.add(V1.normalize().scale(t));
+        assertEquals(expected, ray.getPoint(t), "getPoint() failed for t>0");
+        // TC02: Get point at t<0 should return correct point
+        t = -1.0;
+        expected = P1.add(V1.normalize().scale(t));
+        assertEquals(expected, ray.getPoint(t), "getPoint() failed for t<0");
+        //=============== Boundary Values Tests ==================
+        // BV01: Get point at t=0 should return origin use the exeption of vector 0.
+        Point p0 = new Point(1, 2, 3);
+        Vector v = new Vector(0, 0, 1);
+        Ray ray1 = new Ray(p0, v);
+
+        // ============ Boundary Values Tests ==============
+        // BV01: t is 0, should return the ray origin point
+        assertEquals(p0, ray.getPoint(0), "getPoint(0) should return the ray origin point");
+    }
 }
