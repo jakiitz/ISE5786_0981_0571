@@ -49,21 +49,43 @@ public class Vector extends Point {
         return result;
     }
 
+    /**
+     * Multiplies the vector by a scalar value, returning a new scaled vector.
+     * @param scalar
+     * @return a new Vector that is this vector scaled by the given scalar
+     */
     public Vector scale(double scalar) {
         return new Vector(_xyz.scale(scalar));
     }
+
+    /**
+     * Returns the squared length of the vector, which is more efficient to compute than the actual length.
+     * @return the squared length of the vector
+     */
 
     public double lengthSquared() {
         return dotProduct(this);
     }
 
+    /**
+     * Returns the length (magnitude) of the vector, which is the square root of the squared length.
+     * @return
+     */
+
     public double length() {
         return Math.sqrt(lengthSquared());
     }
 
+    /**
+     * Returns a new vector in the same direction as this vector but with a length of 1 (unit vector).
+     * @return
+     */
+
     public Vector normalize() {
         return scale(1 / length());
     }
+
+
 
     @Override
     public String toString() {

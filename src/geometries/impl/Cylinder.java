@@ -22,22 +22,22 @@ public final class Cylinder extends Tube {
 
     @Override
     public Vector getNormal(primitives.Point point) {
-        // ציר הגליל
+        //direction of the cylinder's axis
         Vector axisDir = _axis.direction();
+        //origin of the cylinder's axis
         primitives.Point axisOrigin = _axis.origin();
-        // וקטור מהבסיס התחתון לנקודה
         Vector p0ToP = point.subtract(axisOrigin);
-        // פרויקט הנקודה על הציר (t)
+        //projection of p0ToP on the axis direction
         double t = axisDir.dotProduct(p0ToP);
-        // אם הנקודה על הבסיס התחתון
+        //if the point is on the base
         if (Math.abs(t) < 1e-10) {
             return axisDir.normalize();
         }
-        // אם הנקודה על הבסיס העליון
+        //if the point is on the top
         if (Math.abs(t - _height) < 1e-10) {
             return axisDir.normalize();
         }
-        // אחרת, הנקודה על מעטפת הצד
+        //the point is on the curved surface
         primitives.Point o = axisOrigin.add(axisDir.scale(t));
         return point.subtract(o).normalize();
     }

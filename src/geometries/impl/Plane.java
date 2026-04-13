@@ -67,24 +67,19 @@ public class Plane extends Geometry {
     public List<Point> findIntersections(Ray ray) {
         double nv = _normal.dotProduct(ray.direction());
 
-        // 1. בדיקה אם הקרן מקבילה למישור (מכנה אפס)
         if (isZero(nv)) {
             return null;
         }
 
-        // טיפול במקרה שראשית הקרן היא הנקודה P0 של המישור למניעת וקטור האפס
         if (_p0.equals(ray.origin())) {
-            return null; // t יהיה 0, ו-t=0 לא נכלל בחיתוכים
+            return null;
         }
 
         Vector p0_q0 = _p0.subtract(ray.origin());
         double nP0MinusP0 = alignZero(_normal.dotProduct(p0_q0));
 
-        // 2. חישוב t עם alignZero
         double t = alignZero(nP0MinusP0 / nv);
 
-        // 3. החזרה רק אם t > 0 (בכיוון הקרן בלבד, ללא ראשית הקרן)
-        // שימוש באופרטור טרנרי כפי שהומלץ במסמך (KISS)
         return t <= 0 ? null : List.of(ray.getPoint(t));
     }
 }
