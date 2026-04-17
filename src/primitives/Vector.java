@@ -85,6 +85,29 @@ public class Vector extends Point {
         return scale(1 / length());
     }
 
+    /**
+     * Returns the X coordinate of the vector.
+     * @return the X coordinate
+     */
+    public double getX() {
+        return _xyz._d1();
+    }
+
+    /**
+     * Returns the Y coordinate of the vector.
+     * @return the Y coordinate
+     */
+    public double getY() {
+        return _xyz._d2();
+    }
+
+    /**
+     * Returns the Z coordinate of the vector.
+     * @return the Z coordinate
+     */
+    public double getZ() {
+        return _xyz._d3();
+    }
 
 
     @Override
