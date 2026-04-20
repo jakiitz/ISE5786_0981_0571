@@ -61,4 +61,134 @@ public class Camera implements Cloneable {
             throw new RuntimeException(e);
         }
     }
+
+    /**
+     * Builder for Camera
+     */
+    public static class Builder {
+        private Point location;
+        private Vector vTo;
+        private Vector vUp;
+        private Point targetPoint;
+        private Double vpWidth;
+        private Double vpHeight;
+        private Double vpDistance;
+        private Integer nX;
+        private Integer nY;
+
+        public Builder setLocation(Point location) {
+            this.location = location;
+            return this;
+        }
+
+        public Builder setVpSize(double width, double height) {
+            this.vpWidth = width;
+            this.vpHeight = height;
+            return this;
+        }
+
+        public Builder setVpDistance(double distance) {
+            this.vpDistance = distance;
+            return this;
+        }
+
+        public Builder setResolution(int nx, int ny) {
+            this.nX = nx;
+            this.nY = ny;
+            return this;
+        }
+
+        public Builder setDirection(Vector vTo, Vector vUp) {
+            this.vTo = vTo;
+            this.vUp = vUp;
+            return this;
+        }
+
+        public Builder setDirection(Point target) {
+            this.targetPoint = target;
+            return this;
+        }
+
+        public Builder setDirection(Point target, Vector vUp) {
+            this.targetPoint = target;
+            this.vUp = vUp;
+            return this;
+        }
+
+        public Camera build() {
+            Camera cam = new Camera();
+
+            if (location == null) {
+                throw new MissingResourceException("Camera location is missing", Camera.class.getName(), "location");
+            }
+
+            // Resolve direction
+            if (vTo == null) {
+                if (targetPoint != null) {
+                    vTo = targetPoint.subtract(location).normalize();
+                }
+            }
+
+            if (vTo == null) {
+                throw new MissingResourceException("Camera direction is missing", Camera.class.getName(), "direction");
+            }
+
+            if (vUp == null) {
+                // Default up vector
+                vUp = Vector.AXIS_Y;
+            }
+
+            if (vpWidth == null || vpHeight == null) {
+                throw new IllegalArgumentException("View plane size must be set");
+            }
+
+            if (vpWidth <= 0 || vpHeight <= 0) {
+                throw new IllegalArgumentException("View plane size must be positive");
+            }
+
+            if (vpDistance == null) {
+                throw new IllegalArgumentException("View plane distance must be set");
+            }
+
+            if (vpDistance <= 0) {
+                throw new IllegalArgumentException("View plane distance must be positive");
+            }
+
+            if (nX == null) {
+                nX = 1;
+            }
+            if (nY == null) {
+                nY = 1;
+            }
+
+            if (nX <= 0 || nY <= 0) {
+                throw new IllegalArgumentException("Resolution must be positive");
+            }
+
+            // Normalize direction vectors
+            vTo = vTo.normalize();
+            vUp = vUp.normalize();
+
+            // Compute right vector
+            Vector vRight = vTo.crossProduct(vUp).normalize();
+
+            // Assign to camera
+            cam.location = location;
+            cam.vTo = vTo;
+            cam.vUp = vUp;
+            cam.vRight = vRight;
+            cam.vpWidth = vpWidth;
+            cam.vpHeight = vpHeight;
+            cam.vpDistance = vpDistance;
+            cam.nX = nX;
+            cam.nY = nY;
+
+            // Compute view plane center and pixel sizes
+            cam.pc = location.add(vTo.scale(vpDistance));
+            cam.pixelWidth = vpWidth / nX;
+            cam.pixelHeight = vpHeight / nY;
+
+            return cam;
+        }
+    }
 }
