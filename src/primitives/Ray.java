@@ -49,5 +49,24 @@ public class Ray {
         return _origin.add(_direction.scale(t));
     }
 
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (!(obj instanceof Ray)) return false;
+        Ray other = (Ray) obj;
+        return _origin.equals(other._origin) && _direction.equals(other._direction);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = _origin != null ? _origin.hashCode() : 0;
+        result = 31 * result + (_direction != null ? _direction.hashCode() : 0);
+        return result;
+    }
+
+    @Override
+    public String toString() {
+        return "Ray{" + "origin=" + _origin + ", direction=" + _direction + '}';
+    }
 
 }
