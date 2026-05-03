@@ -18,6 +18,12 @@ class SimpleRayTracer extends RayTracerBase {
     private Color calcColor(Point intersection) {
         return _scene.ambientLight.getIntensity();
     }
+
+    /**
+     * Traces a ray through the scene and calculates the color at the intersection point.
+     * @param ray the ray to be traced
+     * @return
+     */
     @Override
     Color traceRay(Ray ray) {
         var intersections = _scene.geometries.findIntersections(ray);

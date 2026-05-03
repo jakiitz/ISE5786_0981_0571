@@ -24,11 +24,21 @@ public class Scene {
 
     // Setters for the fields to allow chaining
 
+    /**
+     * Sets the background color of the scene.
+     * @param background
+     * @return
+     */
     public Scene setBackground(Color background) {
         this.background = background;
         return this;
     }
 
+    /**
+     * Sets the ambient light of the scene.
+     * @param ambientLight
+     * @return
+     */
     public Scene setAmbientLight(AmbientLight ambientLight) {
         this.ambientLight = ambientLight;
         return this;

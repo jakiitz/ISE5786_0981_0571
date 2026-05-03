@@ -199,7 +199,7 @@ public class Camera implements Cloneable {
         }
 
         public Camera build() {
-            // 1. בדיקות תקינות בסיסיות
+            // check for required parameters and set defaults where needed
             if (location == null) {
                 throw new MissingResourceException("Camera location is missing", Camera.class.getName(), "location");
             }
@@ -219,7 +219,7 @@ public class Camera implements Cloneable {
                 vUp = Vector.AXIS_Y;
             }
 
-            // בדיקת View Plane
+            // check that vTo and vUp are not parallel
             if (vpWidth == null || vpHeight == null || vpWidth <= 0 || vpHeight <= 0) {
                 throw new IllegalArgumentException("View plane size must be positive");
             }
@@ -228,7 +228,6 @@ public class Camera implements Cloneable {
                 throw new IllegalArgumentException("View plane distance must be positive");
             }
 
-            // 2. טיפול ברזולוציה ואימות (nX, nY)
             if (nX == null) nX = 1;
             if (nY == null) nY = 1;
 
@@ -236,22 +235,21 @@ public class Camera implements Cloneable {
                 throw new IllegalArgumentException("Resolution must be positive");
             }
 
-            // 3. טיפול ב-RayTracer: אם הוא null, הגדרת ברירת מחדל
+            // check if it is null
             if (this._rayTracer == null) {
                 this.setRayTracer(new Scene("test"), RayTracerType.SIMPLE);
             }
 
-            // יצירת מופע המצלמה
+            // create
             Camera cam = new Camera();
 
-            // 4. יצירת ה-ImageWriter בתוך המצלמה לפי הרזולוציה שנקבעה
-            // הערה: imageName צריך להיות מוגדר כשדה בבילדר (למשל שם הסצנה או שם קבוע)
+            // create the ImageWriter and assign it to the camera
             cam._imageWriter = new ImageWriter(nX, nY);
 
-            // 5. העברת ה-RayTracer מהבילדר למצלמה[cite: 2]
+            // assign the RayTracer to the camera
             cam._rayTracer = this._rayTracer;
 
-            // 6. חישובים גיאומטריים של המצלמה[cite: 1]
+            // normalize direction vectors and compute the right vector
             vTo = vTo.normalize();
             vUp = vUp.normalize();
             Vector vRight = vTo.crossProduct(vUp).normalize();
@@ -266,11 +264,12 @@ public class Camera implements Cloneable {
             cam.nX = nX;
             cam.nY = nY;
 
-            // חישוב מרכז מישור התצוגה וגודל פיקסלים[cite: 1]
+
             cam.pc = location.add(vTo.scale(vpDistance));
             cam.pixelWidth = vpWidth / nX;
             cam.pixelHeight = vpHeight / nY;
 
+            // The camera is now fully initialized and ready to use
             return cam;
         }
     }
