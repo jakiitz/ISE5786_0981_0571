@@ -31,15 +31,20 @@ public class CameraIntersectionIntegration {
     @Test
     void testCameraRaySphereIntegration() {
         // Test cases for sphere
+        // The expected intersection counts are based on the geometry of the sphere and the camera's rays.
+        // TC01: A small sphere that is directly in front of the camera, intersecting at two points.
         Sphere sphere1 = new Sphere(new Point(0, 0, -3), 1);
         assertIntersectionsCount(camera1, sphere1, 2, "Sphere 2 points");
 
+        // TC02: A larger sphere that encompasses the camera, intersecting at max points.
         Sphere sphere2 = new Sphere(new Point(0, 0, -2.5), 2.5);
         assertIntersectionsCount(camera1, sphere2, 18, "Sphere 18 points");
 
+        // TC03: A sphere that is partially in front of the camera, intersecting at 10 points.
         Sphere sphere3 = new Sphere(new Point(0, 0, -2), 2);
         assertIntersectionsCount(camera1, sphere3, 10, "Sphere 10 points");
 
+        //
         Sphere sphere4 = new Sphere(new Point(0, 0, -1), 4);
         assertIntersectionsCount(camera1, sphere4, 9, "Sphere 9 points");
 

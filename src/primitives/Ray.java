@@ -1,5 +1,7 @@
 package primitives;
 
+import java.util.List;
+
 import static primitives.Util.isZero;
 
 /**
@@ -69,4 +71,29 @@ public class Ray {
         return "Ray{" + "origin=" + _origin + ", direction=" + _direction + '}';
     }
 
+    /**
+     * Finds the point closest to the ray's origin from a list of points.
+     * @param points list of intersection points
+     * @return the closest point, or null if the list is empty
+     */
+    public Point findClosestPoint(List<Point> points) {
+        // Note: Per instructions, we can assume the list is not null/empty for EP,
+        // but the BV check handles null cases.
+        if (points == null || points.isEmpty()) {
+            return null;
+        }
+
+        Point closestPoint = null;
+        double minDistanceSquared = Double.POSITIVE_INFINITY;
+
+        for (Point p : points) {
+            // Performance optimization: use distanceSquared to avoid unnecessary sqrt calls[cite: 2]
+            double distSq = origin().distanceSquared(p);
+            if (distSq < minDistanceSquared) {
+                minDistanceSquared = distSq;
+                closestPoint = p;
+            }
+        }
+        return closestPoint;
+    }
 }

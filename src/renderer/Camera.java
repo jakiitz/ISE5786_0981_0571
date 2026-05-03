@@ -1,9 +1,12 @@
 package renderer;
 
 import java.util.MissingResourceException;
+
+import primitives.Color;
 import primitives.Point;
 import primitives.Vector;
 import primitives.Ray;
+import scene.Scene;
 
 /**
  * Represents a camera in 3D space for rendering scenes.
@@ -21,6 +24,10 @@ public class Camera implements Cloneable {
     // Computed fields
     Point pc; // Center of view plane
     double pixelWidth, pixelHeight;
+
+    ImageWriter _imageWriter;
+    RayTracerBase _rayTracer;
+
 
     // Package-private default constructor
     Camera() {}
@@ -62,6 +69,72 @@ public class Camera implements Cloneable {
         }
     }
 
+
+    /**
+     * Renders the image by casting rays through each pixel and using the ray tracer to determine the color.
+     * The resulting image is stored in the ImageWriter.
+     * @return this Camera instance for chaining
+     */
+    Camera renderImage()
+    {
+        // Define a renderImage Camera() method and implement it with a loop over all pixels,
+        // inside which a castRay helper method is invoked for each pixel.
+        if(_imageWriter == null)
+        {
+            throw new MissingResourceException("ImageWriter is not set", Camera.class.getName(), "ImageWriter");
+        }
+        if(_rayTracer == null)        {
+            throw new MissingResourceException("RayTracer is not set", Camera.class.getName(), "RayTracer");
+        }
+        for (int i = 0; i < nY; i++) {
+            for (int j = 0; j < nX; j++) {
+                castRay(j, i);
+            }
+        }
+
+        return this; // Supports method chaining
+
+    }
+    /**
+     * Casts a ray through a specific pixel and writes its color to the image.
+     * @param xIndex The column index of the pixel
+     * @param yIndex The row index of the pixel
+     */
+    private void castRay(int xIndex, int yIndex) {
+        Ray ray = constructRay(xIndex, yIndex);
+        Color color = _rayTracer.traceRay(ray);
+        _imageWriter.writePixel(xIndex, yIndex, color);
+    }
+    /**
+     * Prints a grid on top of the existing image without casting new rays.
+     * @param interval The size of each square in the grid (in pixels)
+     * @param color The color of the grid lines
+     * @return the camera object itself
+     */
+    public Camera printGrid(int interval, Color color) {
+        if (_imageWriter == null) {
+            throw new MissingResourceException("ImageWriter is not set", Camera.class.getName(), "ImageWriter");
+        }
+        for (int i = 0; i < nY; i++) {
+            for (int j = 0; j < nX; j++) {
+                if (i % interval == 0 || j % interval == 0) {
+                    _imageWriter.writePixel(j, i, color);
+                }
+            }
+        }
+        return this; // Supports method chaining
+    }
+    /**
+     * Delegates the image creation to the image writer.[cite: 1]
+     * @param fileName the name of the output file
+     */
+    public void writeToImage(String fileName) {
+        if (_imageWriter == null) {
+            throw new MissingResourceException("ImageWriter is not set", Camera.class.getName(), "ImageWriter");
+        }
+        _imageWriter.writeToImage(fileName);
+    }
+
     /**
      * Builder for Camera
      */
@@ -75,6 +148,16 @@ public class Camera implements Cloneable {
         private Double vpDistance;
         private Integer nX;
         private Integer nY;
+        private RayTracerBase _rayTracer;
+
+        public Builder setRayTracer(Scene scene, RayTracerType type) {
+            if (type == RayTracerType.SIMPLE) {
+                this._rayTracer = new SimpleRayTracer(scene);
+            } else {
+                throw new IllegalArgumentException("Unsupported RayTracerType: " + type);
+            }
+            return this;
+        }
 
         public Builder setLocation(Point location) {
             this.location = location;
@@ -116,8 +199,7 @@ public class Camera implements Cloneable {
         }
 
         public Camera build() {
-            Camera cam = new Camera();
-
+            // 1. בדיקות תקינות בסיסיות
             if (location == null) {
                 throw new MissingResourceException("Camera location is missing", Camera.class.getName(), "location");
             }
@@ -134,45 +216,46 @@ public class Camera implements Cloneable {
             }
 
             if (vUp == null) {
-                // Default up vector
                 vUp = Vector.AXIS_Y;
             }
 
-            if (vpWidth == null || vpHeight == null) {
-                throw new IllegalArgumentException("View plane size must be set");
-            }
-
-            if (vpWidth <= 0 || vpHeight <= 0) {
+            // בדיקת View Plane
+            if (vpWidth == null || vpHeight == null || vpWidth <= 0 || vpHeight <= 0) {
                 throw new IllegalArgumentException("View plane size must be positive");
             }
 
-            if (vpDistance == null) {
-                throw new IllegalArgumentException("View plane distance must be set");
-            }
-
-            if (vpDistance <= 0) {
+            if (vpDistance == null || vpDistance <= 0) {
                 throw new IllegalArgumentException("View plane distance must be positive");
             }
 
-            if (nX == null) {
-                nX = 1;
-            }
-            if (nY == null) {
-                nY = 1;
-            }
+            // 2. טיפול ברזולוציה ואימות (nX, nY)
+            if (nX == null) nX = 1;
+            if (nY == null) nY = 1;
 
             if (nX <= 0 || nY <= 0) {
                 throw new IllegalArgumentException("Resolution must be positive");
             }
 
-            // Normalize direction vectors
+            // 3. טיפול ב-RayTracer: אם הוא null, הגדרת ברירת מחדל
+            if (this._rayTracer == null) {
+                this.setRayTracer(new Scene("test"), RayTracerType.SIMPLE);
+            }
+
+            // יצירת מופע המצלמה
+            Camera cam = new Camera();
+
+            // 4. יצירת ה-ImageWriter בתוך המצלמה לפי הרזולוציה שנקבעה
+            // הערה: imageName צריך להיות מוגדר כשדה בבילדר (למשל שם הסצנה או שם קבוע)
+            cam._imageWriter = new ImageWriter(nX, nY);
+
+            // 5. העברת ה-RayTracer מהבילדר למצלמה[cite: 2]
+            cam._rayTracer = this._rayTracer;
+
+            // 6. חישובים גיאומטריים של המצלמה[cite: 1]
             vTo = vTo.normalize();
             vUp = vUp.normalize();
-
-            // Compute right vector
             Vector vRight = vTo.crossProduct(vUp).normalize();
 
-            // Assign to camera
             cam.location = location;
             cam.vTo = vTo;
             cam.vUp = vUp;
@@ -183,7 +266,7 @@ public class Camera implements Cloneable {
             cam.nX = nX;
             cam.nY = nY;
 
-            // Compute view plane center and pixel sizes
+            // חישוב מרכז מישור התצוגה וגודל פיקסלים[cite: 1]
             cam.pc = location.add(vTo.scale(vpDistance));
             cam.pixelWidth = vpWidth / nX;
             cam.pixelHeight = vpHeight / nY;
@@ -192,3 +275,4 @@ public class Camera implements Cloneable {
         }
     }
 }
+
