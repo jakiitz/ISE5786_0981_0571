@@ -5,6 +5,7 @@ import static primitives.Util.isZero;
 import java.util.List;
 
 import geometries.api.Geometry;
+import geometries.api.Intersectable;
 import primitives.*;
 
 /**
@@ -79,9 +80,10 @@ public class Polygon extends Geometry {
 
    /** Finds intersections of the polygon with a given ray.
     * @param ray the ray to intersect with
-    * @return list of intersection points (null if no intersections)
+    * @return list of intersection objects (null if no intersections)
     */
    @Override
-   public List<Point> findIntersections(Ray ray) {
-      return null;}
+   protected List<Intersectable.Intersection> calcIntersectionsHelper(Ray ray) {
+      return null;
+   }
 }

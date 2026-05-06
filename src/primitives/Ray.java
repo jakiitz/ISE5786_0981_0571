@@ -1,6 +1,7 @@
 package primitives;
 
 import java.util.List;
+import geometries.api.Intersectable.Intersection;
 
 import static primitives.Util.isZero;
 
@@ -69,6 +70,31 @@ public class Ray {
     @Override
     public String toString() {
         return "Ray{" + "origin=" + _origin + ", direction=" + _direction + '}';
+    }
+
+    /**
+     * Finds the intersection closest to the ray's origin from a list of intersections.
+     * @param intersections list of intersections
+     * @return the closest intersection, or null if the list is empty
+     */
+    public Intersection findClosestIntersection(List<Intersection> intersections) {
+        if (intersections == null || intersections.isEmpty()) {
+            return null;
+        }
+
+        Intersection closestIntersection = null;
+        double minDistanceSquared = Double.POSITIVE_INFINITY;
+
+        for (Intersection intersection : intersections) {
+            if (intersection != null) {
+                double distSq = origin().distanceSquared(intersection.point);
+                if (distSq < minDistanceSquared) {
+                    minDistanceSquared = distSq;
+                    closestIntersection = intersection;
+                }
+            }
+        }
+        return closestIntersection;
     }
 
     /**

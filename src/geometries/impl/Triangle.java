@@ -3,6 +3,7 @@ package geometries.impl;
 import primitives.Point;
 import primitives.Ray;
 import primitives.Vector;
+import geometries.api.Intersectable;
 
 import java.util.List;
 
@@ -30,13 +31,13 @@ public final class Triangle extends Polygon {
     }
 
     /**
-     * find the intersection with a ray
+     * find the intersection with a ray (NVI helper)
      *
      * @param ray the ray to intersect with the triangle
-     * @return list of intersection points (null if no intersections)
+     * @return list of intersection objects (null if no intersections)
      */
     @Override
-    public List<Point> findIntersections(Ray ray) {
+    protected List<Intersectable.Intersection> calcIntersectionsHelper(Ray ray) {
         // שלב 1: מציאת חיתוך עם המישור המכיל את המשולש
         // משתמשים בנוסחה: t = (n * (p0 - head)) / (n * dir)
         Vector v = ray.direction();
@@ -83,7 +84,7 @@ public final class Triangle extends Polygon {
         // הנקודה בפנים אם לכולם אותו סימן
         if ((s1 > 0 && s2 > 0 && s3 > 0) || (s1 < 0 && s2 < 0 && s3 < 0)) {
             // יצירת הרשימה רק כשבטוחים שיש חיתוך (ביצועים)
-            return List.of(ray.getPoint(t));
+            return List.of(new Intersectable.Intersection(this, ray.getPoint(t)));
         }
 
         return null;

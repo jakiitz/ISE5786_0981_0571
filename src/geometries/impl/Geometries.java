@@ -23,10 +23,10 @@ public class Geometries extends Intersectable {
     }
 
     @Override
-    public List<Point> findIntersections(Ray ray) {
-        List<Point> result = null;
+    protected List<Intersectable.Intersection> calcIntersectionsHelper(Ray ray) {
+        List<Intersectable.Intersection> result = null;
         for (Intersectable item : geometries) {
-            var itemIntersections = item.findIntersections(ray);
+            var itemIntersections = item.calcIntersections(ray);
             if (itemIntersections != null) {
                 if (result == null) {
                     result = new ArrayList<>();

@@ -1,6 +1,7 @@
 package geometries.impl;
 
 import primitives.*;
+import geometries.api.Intersectable;
 
 import java.util.List;
 
@@ -49,12 +50,12 @@ public class Tube extends RadialGeometry {
     }
 
     /**
-     * find the intersection points of the tube with a ray
+     * find the intersection points of the tube with a ray (NVI helper)
      * @param ray the ray to intersect with
-     * @return list of intersection points (null if no intersections)
+     * @return list of intersection objects (null if no intersections)
      */
     @Override
-    public List<Point> findIntersections(Ray ray) {
+    protected List<Intersectable.Intersection> calcIntersectionsHelper(Ray ray) {
         return null;
     }
 }
