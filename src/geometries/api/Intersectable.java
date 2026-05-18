@@ -6,19 +6,19 @@ import java.util.List;
 import java.util.Objects;
 
 /**
- * Interface Intersectable represents geometric objects that can be intersected by rays.
+ * Interface Intersectable represents geometric objects that rays can intersect.
  * It defines a method to find the intersection points of a ray with the geometry.
  */
 public abstract class Intersectable {
-    
+
     /**
      * Nested class representing an intersection between a ray and a geometry.
      */
     public static class Intersection {
-        public final Geometry geometry; // Forward reference - resolved at runtime
-        public final Point point;
-        public final Material material;
-        
+        public Geometry geometry;
+        public Point point;
+        public Material material;
+
         /**
          * Constructor for Intersection
          * @param geometry the geometry that was intersected
@@ -29,7 +29,7 @@ public abstract class Intersectable {
             this.point = point;
             this.material = geometry == null ? new Material() : geometry.getMaterial();
         }
-        
+
         @Override
         public boolean equals(Object obj) {
             if (this == obj) return true;
@@ -37,12 +37,12 @@ public abstract class Intersectable {
             Intersection other = (Intersection) obj;
             return this.geometry == other.geometry && this.point.equals(other.point);
         }
-        
+
         @Override
         public int hashCode() {
             return Objects.hash(System.identityHashCode(geometry), point);
         }
-        
+
         @Override
         public String toString() {
             return "Intersection{" +
@@ -51,7 +51,7 @@ public abstract class Intersectable {
                     '}';
         }
     }
-    
+
     /**
      * Protected abstract method to calculate intersections.
      * Must be implemented by subclasses.
@@ -59,7 +59,7 @@ public abstract class Intersectable {
      * @return list of intersections (null if no intersections)
      */
     protected abstract List<Intersection> calcIntersectionsHelper(Ray ray);
-    
+
     /**
      * Public final method to find intersections using the NVI pattern.
      * @param ray the ray to intersect with
@@ -68,7 +68,7 @@ public abstract class Intersectable {
     public final List<Intersection> calcIntersections(Ray ray) {
         return calcIntersectionsHelper(ray);
     }
-    
+
     /**
      * Finds intersection points of the ray with the geometry.
      * Refactored to use the new Intersection-based approach.

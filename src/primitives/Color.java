@@ -138,6 +138,17 @@ public final class Color {
    }
 
    /**
+    * Reduces this color by dividing each component by the given factor.
+    * @param  k                        the reduction factor
+    * @return                          a new reduced color
+    * @throws IllegalArgumentException if {@code k} is less than 1
+    */
+   public Color reduce(double k) {
+      if (k < 1) throw new IllegalArgumentException("Reduction factor must be at least 1");
+      return new Color(_rgb.divide(k));
+   }
+
+   /**
     * Tolerant equality based on {@code DELTA} per RGB component.
     * Intended for floating-point comparisons in rendering and tests.
     * <p>
@@ -151,10 +162,10 @@ public final class Color {
    @Override
    public boolean equals(Object obj) {
       return this == obj ||
-            (obj instanceof Color other &&
-                  abs(_rgb._d1() - other._rgb._d1()) < DELTA
-                  && abs(_rgb._d2() - other._rgb._d2()) < DELTA
-                  && abs(_rgb._d3() - other._rgb._d3()) < DELTA);
+              (obj instanceof Color other &&
+                      abs(_rgb._d1() - other._rgb._d1()) < DELTA
+                      && abs(_rgb._d2() - other._rgb._d2()) < DELTA
+                      && abs(_rgb._d3() - other._rgb._d3()) < DELTA);
    }
 
    /**

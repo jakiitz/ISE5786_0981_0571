@@ -2,7 +2,11 @@ package scene;
 
 import geometries.impl.Geometries;
 import lighting.AmbientLight;
+import lighting.LightSource;
 import primitives.Color;
+
+import java.util.ArrayList;
+import java.util.List;
 // import geometries.Geometries; // יש לייבא את מחלקת הגיאומטריות שלך
 
 /**
@@ -13,6 +17,7 @@ public class Scene {
     public Color background = Color.BLACK; // ברירת מחדל שחור
     public AmbientLight ambientLight = AmbientLight.NONE; // ברירת מחדל NONE
     public Geometries geometries = new Geometries(); // מאותחל לאובייקט חדש
+    public List<LightSource> lights = new ArrayList<>();
 
     /**
      * Constructor for Scene
@@ -44,5 +49,13 @@ public class Scene {
         return this;
     }
 
-
+    /**
+     * Sets the light sources of the scene.
+     * @param lights list of light sources
+     * @return this scene for chaining
+     */
+    public Scene setLights(List<LightSource> lights) {
+        this.lights = lights;
+        return this;
+    }
 }
