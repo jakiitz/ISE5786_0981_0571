@@ -14,11 +14,11 @@ import static primitives.Util.alignZero;
 public final class Sphere extends RadialGeometry {
     private final Point _center;
 
-    /**
-     * constructor of sphere
+     /**
+     * Constructor of Sphere.
      *
-     * @param center
-     * @param radius
+     * @param center center point of the sphere
+     * @param radius radius of the sphere
      */
     public Sphere(Point center, double radius) {
         super(radius);

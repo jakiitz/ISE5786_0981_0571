@@ -13,4 +13,11 @@ public interface LightSource {
 
     /*Calculating the intensity of the light at a given point, taking into account factors such as distance and attenuation*/
    Color getIntensity(Point p);
+
+    /**
+     * Calculates the distance from the light source to a given point.
+     * @param p the given point
+     * @return the distance
+     */
+    double getDistance(Point p);
 }

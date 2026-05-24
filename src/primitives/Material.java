@@ -5,9 +5,11 @@ package primitives;
  * This is a PDS (Public Data Structure) containing material properties like ambient attenuation.
  */
 public class Material {
-    public Double3 kA = Double3.ONE;
-    public Double3 kD = Double3.ZERO;
-    public Double3 kS = Double3.ZERO;
+    public Double3 kA = Double3.ONE; // default ambient attenuation coefficient is 1 (full ambient light)
+    public Double3 kD = Double3.ZERO; // default diffuse attenuation coefficient is 0 (no diffuse reflection)
+    public Double3 kS = Double3.ZERO; // default specular attenuation coefficient is 0 (no specular reflection)
+    public Double3 kT = Double3.ZERO;
+    public Double3 kR = Double3.ZERO;
     public int nShininess = 0;
 
     /**
@@ -114,6 +116,31 @@ public class Material {
      */
     public Material setShininess(int nShininess) {
         this.nShininess = nShininess;
+        return this;
+    }
+    /**
+     * Sets the transparency coefficient (kT)
+     */
+    public Material setKT(Double3 kT) {
+        this.kT = kT;
+        return this;
+    }
+
+    public Material setKT(double kT) {
+        this.kT = new Double3(kT);
+        return this;
+    }
+
+    /**
+     * Sets the reflection coefficient (kR)
+     */
+    public Material setKR(Double3 kR) {
+        this.kR = kR;
+        return this;
+    }
+
+    public Material setKR(double kR) {
+        this.kR = new Double3(kR);
         return this;
     }
 }

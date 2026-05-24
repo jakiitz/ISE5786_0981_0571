@@ -6,12 +6,9 @@ package primitives;
  * <p>
  * The class provides operations related to floating-point accuracy control,
  * sign comparison, and simple numeric utilities.
- * </p>
- * <p>
  * The implementation is optimized for performance and therefore avoids
  * expensive floating-point operations where possible, relying instead on
  * direct manipulation of the IEEE-754 {@code double} representation.
- * </p>
  * This class cannot be instantiated.
  * @author Dan Zilberstein
  */
@@ -34,21 +31,16 @@ public final class Util {
 
    /**
     * Extracts the unbiased exponent of a {@code double}.
-    * <p>
-    * IEEE-754 double format:
-    * 
-    * <pre>
+       * <p>
+       * IEEE-754 double format:
+       * <pre>
     * sign | exponent (11 bits) | mantissa (52 bits)
     * </pre>
-    * 
-    * The actual number represented is:
-    * 
-    * <pre>
+       * The actual number represented is:
+       * <pre>
     * value = mantissa * 2 ^ exponent
     * </pre>
-    * 
-    * where the stored exponent is biased by 1023.
-    * </p>
+       * where the stored exponent is biased by 1023.
     * @param  num the number
     * @return     the unbiased exponent
     */
@@ -70,10 +62,9 @@ public final class Util {
 
    /**
     * Returns zero if the given value is numerically close to zero.
-    * <p>
-    * This helps eliminate floating-point noise that may accumulate
+       * <p>
+       * This helps eliminate floating-point noise that may accumulate
     * in geometric calculations.
-    * </p>
     * @param  number the number to align
     * @return        0.0 if the value is considered zero, otherwise the original
     *                value
@@ -84,12 +75,12 @@ public final class Util {
     * Checks whether two numbers have the same sign.
     * <p>
     * Zero is considered neither positive nor negative.
-    * </p>
     * @param  n1 first number
     * @param  n2 second number
     * @return    {@code true} if both numbers are positive or both are negative
     */
-   public static boolean compareSign(double n1, double n2) { return (n1 > 0 && n2 > 0) || (n1 < 0 && n2 < 0); }
+     @SuppressWarnings("unused")
+     public static boolean compareSign(double n1, double n2) { return (n1 > 0 && n2 > 0) || (n1 < 0 && n2 < 0); }
 
    /**
     * Returns a random double in the range {@code [min, max)}.
@@ -97,6 +88,7 @@ public final class Util {
     * @param  max upper bound (exclusive)
     * @return     random value in the specified range
     */
-   public static double random(double min, double max) { return Math.random() * (max - min) + min; }
+     @SuppressWarnings("unused")
+     public static double random(double min, double max) { return Math.random() * (max - min) + min; }
 
 }
