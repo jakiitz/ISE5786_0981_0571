@@ -102,4 +102,14 @@ public record Double3(double _d1, double _d2, double _d3) {
     *               the corresponding component in {@code other}
     */
    public boolean isLowerThan(Double3 other) { return _d1 < other._d1 && _d2 < other._d2 && _d3 < other._d3; }
+
+   /**
+    * Checks whether this triad is not lower than another triad component-wise.
+    * @param  other the triad to compare with
+    * @return       {@code true} if at least one component of this triad is greater
+    *               than or equal to the corresponding component in {@code other}
+    */
+   public boolean isGreaterThan(Double3 other) {
+      return _d1 >= other._d1 || _d2 >= other._d2 || _d3 >= other._d3;
+   }
 }

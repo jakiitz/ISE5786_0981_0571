@@ -3,6 +3,7 @@ package renderer;
 import static java.awt.Color.BLUE;
 import static java.awt.Color.RED;
 
+import geometries.impl.Polygon;
 import org.junit.jupiter.api.Test;
 
 import geometries.impl.Sphere;
@@ -112,5 +113,59 @@ class TransparencyReflectionTests {
          .build() //
          .renderImage() //
          .writeToImage("refractionShadow");
+   }
+   @Test
+   public void myFinalCustomScene() {
+      Scene scene = new Scene("My Final Scene");
+      scene.setAmbientLight(new AmbientLight(new Color(30, 30, 30)));
+
+      scene.geometries.add(
+              // 1. רצפה משתקפת (מראה) - מדגימה השתקפות
+              new Polygon(
+                      new Point(-200, -200, -150),
+                      new Point(200, -200, -150),
+                      new Point(200, 200, -150),
+                      new Point(-200, 200, -150)
+              )
+                      .setEmission(new Color(20, 20, 20))
+                      .setMaterial(new Material().setKD(0.5).setKS(0.5).setShininess(60).setKR(0.5)),
+
+              // 2. כדור חיצוני שקוף - מדגים שקיפות וצל חלקי
+              new Sphere(new Point(0, 0, -50), 60D)
+                      .setEmission(new Color(java.awt.Color.BLUE).scale(0.1))
+                      .setMaterial(new Material().setKD(0.2).setKS(0.9).setShininess(100).setKT(0.8)),
+
+              // 3. כדור פנימי אטום - כדי לראות אותו דרך הכדור השקוף
+              new Sphere(new Point(0, 0, -50), 30D)
+                      .setEmission(new Color(java.awt.Color.RED))
+                      .setMaterial(new Material().setKD(0.4).setKS(0.3).setShininess(100)),
+
+              // 4. משולש אטום מרחף - מטיל צל על הכדור והרצפה
+              new Triangle(
+                      new Point(50, 50, 50),
+                      new Point(100, 50, 50),
+                      new Point(75, 100, 50)
+              )
+                      .setEmission(new Color(java.awt.Color.GREEN).scale(0.5))
+                      .setMaterial(new Material().setKD(0.6).setKS(0.4).setShininess(30))
+      );
+
+      // מקור תאורה שממוקם כך שיטיל צללים מעניינים
+      scene.lights.add(
+              new SpotLight(new Color(700, 500, 500), new Point(150, 150, 150), new Vector(-1, -1, -1.5))
+                      .setKl(0.0001).setKq(0.000005)
+      );
+
+      Camera.Builder cameraBuilder = Camera.getBuilder()
+              .setRayTracer(scene, RayTracerType.SIMPLE)
+              .setLocation(new Point(0, 0, 800))
+              .setDirection(new Vector(0, 0, -1), new Vector(0, 1, 0))
+              .setVpDistance(800)
+              .setVpSize(200, 200)
+              .setResolution(600, 600); // אפשר להקטין ל-400x400 אם הרינדור לוקח יותר מדי זמן
+
+      cameraBuilder.build()
+              .renderImage()
+              .writeToImage("myFinalCustomScene8");
    }
 }

@@ -6,7 +6,7 @@ import static primitives.Util.isZero;
 import geometries.impl.*;
 import primitives.*;
 
-/**
+/** 
  * Basic sanity tests for the primitives classes.
  * The program performs a small set of runtime checks on the basic
  * geometric primitives and on constructors of several geometry objects.
