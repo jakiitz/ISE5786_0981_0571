@@ -1,5 +1,6 @@
 package geometries.impl;
 
+import static primitives.Util.alignZero;
 import static primitives.Util.isZero;
 
 import java.util.List;
@@ -84,6 +85,45 @@ public class Polygon extends Geometry {
     */
    @Override
    protected List<Intersectable.Intersection> calcIntersectionsHelper(Ray ray) {
-      return null;
+      Vector v    = ray.direction();
+      Point  head = ray.origin();
+      Vector n    = _plane.getNormal(null);
+
+      double nv = n.dotProduct(v);
+      if (isZero(nv)) return null;
+
+      Vector p0MinusHead;
+      try {
+         p0MinusHead = _vertices.get(0).subtract(head);
+      } catch (IllegalArgumentException e) {
+         return null;
+      }
+
+      double t = alignZero(n.dotProduct(p0MinusHead) / nv);
+      if (t <= 0) return null;
+
+      // Build vectors from ray origin to each vertex
+      Vector[] vecs = new Vector[_size];
+      for (int i = 0; i < _size; i++) {
+         vecs[i] = _vertices.get(i).subtract(head);
+      }
+
+      // For a convex polygon all consecutive-edge cross products must have
+      // the same sign when dotted with the ray direction
+      boolean positive = false;
+      for (int i = 0; i < _size; i++) {
+         Vector ni;
+         try {
+            ni = vecs[i].crossProduct(vecs[(i + 1) % _size]).normalize();
+         } catch (IllegalArgumentException e) {
+            return null;
+         }
+         double sign = alignZero(v.dotProduct(ni));
+         if (isZero(sign)) return null;
+         if (i == 0) positive = sign > 0;
+         else if (positive != (sign > 0)) return null;
+      }
+
+      return List.of(new Intersectable.Intersection(this, ray.getPoint(t)));
    }
 }
