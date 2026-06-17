@@ -21,9 +21,13 @@ import scene.Scene;
  */
 class FinalSceneTest {
 
+    /** Thread count: -2=auto raw threads, -1=parallel stream, 0=single-threaded */
+    private static final int     THREADS = -2;
+
     private final Scene          scene  = new Scene("Crystal Stage");
     private final Camera.Builder camera = Camera.getBuilder()
-            .setRayTracer(scene, RayTracerType.SIMPLE);
+            .setRayTracer(scene, RayTracerType.SIMPLE)
+            .setMultithreading(THREADS).setDebugPrint(1);
 
     @Test
     @SuppressWarnings("java:S109")

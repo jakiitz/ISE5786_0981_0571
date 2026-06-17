@@ -80,14 +80,15 @@ public class Ray {
      * @param t the distance parameter along the ray direction
      * @return the point at distance t along the ray, or the origin if t is zero
      */
-    public Point getPoint(double t)
-    {
-        // Optimization: if t is zero (or very close to zero), return origin directly
-        if (isZero(t)) {
+    public Point getPoint(double t) {
+        if (isZero(t)) return _origin;
+        try {
+            return _origin.add(_direction.scale(t));
+        } catch (IllegalArgumentException ignored) {
+            // t is so small that direction.scale(t) underflows to a zero vector;
+            // treat the displacement as zero and return the origin.
             return _origin;
         }
-        // Otherwise, calculate the point by scaling direction by t and adding to origin
-        return _origin.add(_direction.scale(t));
     }
 
     /**

@@ -10,72 +10,50 @@ import scene.Scene;
 import static primitives.Util.alignZero;
 
 /**
- * Abstract base class for ray tracers. It defines the structure for tracing rays through a scene to determine the color of pixels in the rendered image.
+ * Abstract base class for ray tracers.
+ * All precomputed intersection data is returned as immutable records so that
+ * each thread in a multi-threaded render has its own local copy — no shared
+ * mutable state.
  */
 abstract class RayTracerBase {
-    /** The scene to be rendered, containing geometries and lighting information. */
+
+    /** The scene to be rendered. */
     protected final Scene _scene;
 
-    /** Normal vector at the intersection point. */
-    protected Vector normal;
+    /** Precomputed values for a single intersection (one per ray, thread-local). */
+    protected record IntersectionCtx(Vector normal, Vector v, double nv) {}
 
-    /** Vector from the camera/ray origin direction. */
-    protected Vector v;
+    /** Precomputed values for a single light-source contribution (one per light, thread-local). */
+    protected record LightCtx(LightSource source, Vector l, double nl, Color intensity) {}
 
-    /** Dot product of normal and view vector. */
-    protected double nv;
-
-    /** Direction vector from light source to the point. */
-    protected Vector l;
-
-    /** Dot product of normal and light vector. */
-    protected double nl;
-
-    /** Light intensity at the intersection point. */
-    protected Color lightIntensity;
-
-    /** Abstract method to trace a ray through the scene and determine the resulting color.
-     * @param ray the ray to be traced
-     * @return the color resulting from tracing the ray through the scene
-     */
-    abstract Color traceRay(Ray ray);
-
-    /** Constructor for RayTracerBase
-     * @param scene the scene to be rendered
-     */
     RayTracerBase(Scene scene) {
         _scene = scene;
     }
 
-    /**
-     * Preprocesses data related to an intersection.
-     * @param intersection the intersection to preprocess
-     * @param ray the ray that created the intersection
-     * @return true if the intersection can be shaded
-     */
-    protected boolean preprocessIntersection(Intersectable.Intersection intersection, Ray ray) {
-        normal = intersection.geometry.getNormal(intersection.point);
-        v = ray.direction();
-        nv = alignZero(normal.dotProduct(v));
+    /** Traces a ray through the scene and returns the resulting pixel colour. */
+    abstract Color traceRay(Ray ray);
 
-        return nv != 0;
+    /**
+     * Computes the intersection context for the given hit.
+     * @return a context record, or {@code null} if the ray grazes the surface (nv == 0)
+     */
+    protected IntersectionCtx preprocessIntersection(Intersectable.Intersection intersection, Ray ray) {
+        Vector normal = intersection.geometry.getNormal(intersection.point);
+        Vector v      = ray.direction();
+        double nv     = alignZero(normal.dotProduct(v));
+        return nv != 0 ? new IntersectionCtx(normal, v, nv) : null;
     }
 
     /**
-     * Preprocesses data related to a light source.
-     * @param intersection the intersection to shade
-     * @param lightSource the light source
-     * @return true if the light source affects the intersection
+     * Computes the light-source context for the given light at the given hit.
+     * @return a context record, or {@code null} if the light is on the wrong side
      */
-    protected boolean preprocessLightSource(Intersectable.Intersection intersection, LightSource lightSource) {
-        l = lightSource.getL(intersection.point);
-        nl = alignZero(normal.dotProduct(l));
-
-        if (nl * nv <= 0) {
-            return false;
-        }
-
-        lightIntensity = lightSource.getIntensity(intersection.point);
-        return true;
+    protected LightCtx preprocessLightSource(Intersectable.Intersection intersection,
+                                              LightSource lightSource,
+                                              IntersectionCtx ctx) {
+        Vector l  = lightSource.getL(intersection.point);
+        double nl = alignZero(ctx.normal().dotProduct(l));
+        if (nl * ctx.nv() <= 0) return null;
+        return new LightCtx(lightSource, l, nl, lightSource.getIntensity(intersection.point));
     }
 }

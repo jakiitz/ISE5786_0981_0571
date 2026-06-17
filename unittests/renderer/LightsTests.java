@@ -21,6 +21,8 @@ import scene.Scene;
 class LightsTests {
    /** Constant for tests resolution */
    private static final int RESOLUTION = 500;
+   /** Thread count: -2=auto raw threads, -1=parallel stream, 0=single-threaded */
+   private static final int THREADS    = -2;
 
    /** Default constructor to satisfy JavaDoc generator */
    LightsTests() { /* to satisfy JavaDoc generator */ }
@@ -36,14 +38,16 @@ class LightsTests {
       .setRayTracer(_scene1, RayTracerType.SIMPLE)                                                              //
       .setLocation(new Point(0, 0, 1000))                                                                       //
       .setDirection(Point.ZERO, Vector.AXIS_Y)                                                                  //
-      .setVpSize(150, 150).setVpDistance(1000);
+      .setVpSize(150, 150).setVpDistance(1000)                                                                  //
+      .setMultithreading(THREADS).setDebugPrint(1);
 
    /** Second camera builder for some of tests */
    private final Camera.Builder  _camera2                  = Camera.getBuilder()                                //
       .setRayTracer(_scene2, RayTracerType.SIMPLE)                                                              //
       .setLocation(new Point(0, 0, 1000))                                                                       //
       .setDirection(Point.ZERO, Vector.AXIS_Y)                                                                  //
-      .setVpSize(200, 200).setVpDistance(1000);
+      .setVpSize(200, 200).setVpDistance(1000)                                                                  //
+      .setMultithreading(THREADS).setDebugPrint(1);
 
    /** Shininess value for most of the geometries in the tests */
    private static final int      SHININESS                 = 301;

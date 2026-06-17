@@ -1,6 +1,8 @@
 package renderer;
 
+import java.util.LinkedList;
 import java.util.MissingResourceException;
+import java.util.stream.IntStream;
 
 import primitives.Color;
 import primitives.Point;
@@ -11,6 +13,7 @@ import scene.Scene;
 /**
  * Represents a camera in 3D space for rendering scenes.
  * Uses the Builder pattern for construction.
+ * Supports single-threaded, raw-thread, and parallel-stream rendering modes.
  */
 public class Camera implements Cloneable {
     // Camera location
@@ -22,19 +25,23 @@ public class Camera implements Cloneable {
     // View plane resolution
     int nX = 1, nY = 1;
     // Computed fields
-    Point pc; // Center of view plane
+    Point pc;
     double pixelWidth, pixelHeight;
 
     ImageWriter _imageWriter;
     RayTracerBase _rayTracer;
 
+    // 0 = single-threaded, -1 = parallel stream, -2 = auto raw threads, N>0 = N raw threads
+    private int _threadsCount = 0;
+    private static final int SPARE_THREADS = 2;
+    private double _printInterval = 0;
+    private PixelManager _pixelManager;
 
     // Package-private default constructor
     Camera() {}
 
     /**
      * Returns a new Builder instance for constructing a Camera.
-     * @return a new Builder
      */
     public static Builder getBuilder() {
         return new Builder();
@@ -42,22 +49,20 @@ public class Camera implements Cloneable {
 
     /**
      * Constructs a ray from the camera through a specific pixel on the view plane.
-     * @param xIndex the column index of the pixel
-     * @param yIndex the row index of the pixel
+     *
+     * @param xIndex column index of the pixel
+     * @param yIndex row index of the pixel
      * @return the constructed ray
      */
     public Ray constructRay(int xIndex, int yIndex) {
         double xOffset = (xIndex - (nX - 1) / 2.0) * pixelWidth;
         double yOffset = ((nY - 1) / 2.0 - yIndex) * pixelHeight;
         Point pixelCenter = pc;
-        if (xOffset != 0) {
+        if (xOffset != 0)
             pixelCenter = pixelCenter.add(vRight.scale(xOffset));
-        }
-        if (yOffset != 0) {
+        if (yOffset != 0)
             pixelCenter = pixelCenter.add(vUp.scale(yOffset));
-        }
-        Vector direction = pixelCenter.subtract(location);
-        return new Ray(location, direction);
+        return new Ray(location, pixelCenter.subtract(location));
     }
 
     @Override
@@ -69,75 +74,113 @@ public class Camera implements Cloneable {
         }
     }
 
+    /**
+     * Validates resources, initialises the pixel manager, then dispatches to
+     * the appropriate rendering strategy based on {@code _threadsCount}.
+     *
+     * @return this Camera for method chaining
+     */
+    public Camera renderImage() {
+        if (_imageWriter == null)
+            throw new MissingResourceException("ImageWriter is not set", Camera.class.getName(), "ImageWriter");
+        if (_rayTracer == null)
+            throw new MissingResourceException("RayTracer is not set", Camera.class.getName(), "RayTracer");
+
+        _pixelManager = new PixelManager(nY, nX, _printInterval);
+
+        return switch (_threadsCount) {
+            case 0  -> renderImageNoThreads();
+            case -1 -> renderImageStream();
+            default -> renderImageRawThreads();
+        };
+    }
 
     /**
-     * Renders the image by casting rays through each pixel and using the ray tracer to determine the color.
-     * The resulting image is stored in the ImageWriter.
-     * @return this Camera instance for chaining
+     * Single-threaded rendering — iterates over every pixel sequentially.
      */
-    Camera renderImage()
-    {
-        // Define a renderImage Camera() method and implement it with a loop over all pixels,
-        // inside which a castRay helper method is invoked for each pixel.
-        if(_imageWriter == null)
-        {
-            throw new MissingResourceException("ImageWriter is not set", Camera.class.getName(), "ImageWriter");
-        }
-        if(_rayTracer == null)        {
-            throw new MissingResourceException("RayTracer is not set", Camera.class.getName(), "RayTracer");
-        }
-        for (int i = 0; i < nY; i++) {
-            for (int j = 0; j < nX; j++) {
+    private Camera renderImageNoThreads() {
+        for (int i = 0; i < nY; i++)
+            for (int j = 0; j < nX; j++)
                 castRay(j, i);
+        return this;
+    }
+
+    /**
+     * Multi-threaded rendering using {@code _threadsCount} raw Java threads.
+     * Each thread pulls the next available pixel from the PixelManager.
+     */
+    private Camera renderImageRawThreads() {
+        LinkedList<Thread> threads = new LinkedList<>();
+        for (int t = 0; t < _threadsCount; t++) {
+            threads.add(new Thread(() -> {
+                PixelManager.Pixel pixel;
+                while ((pixel = _pixelManager.nextPixel()) != null)
+                    castRay(pixel.row(), pixel.col());
+            }));
+        }
+        threads.forEach(Thread::start);
+        for (Thread thread : threads) {
+            try {
+                thread.join();
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
             }
         }
-
-        return this; // Supports method chaining
-
+        return this;
     }
+
     /**
-     * Casts a ray through a specific pixel and writes its color to the image.
-     * @param xIndex The column index of the pixel
-     * @param yIndex The row index of the pixel
+     * Multi-threaded rendering using parallel streams over both axes.
+     */
+    private Camera renderImageStream() {
+        IntStream.range(0, nY).parallel()
+                .forEach(y -> IntStream.range(0, nX).parallel()
+                        .forEach(x -> castRay(x, y)));
+        return this;
+    }
+
+    /**
+     * Casts a ray through pixel (xIndex, yIndex), traces its colour, and records it.
      */
     private void castRay(int xIndex, int yIndex) {
-        Ray ray = constructRay(xIndex, yIndex);
-        Color color = _rayTracer.traceRay(ray);
+        Color color = _rayTracer.traceRay(constructRay(xIndex, yIndex));
         _imageWriter.writePixel(xIndex, yIndex, color);
+        _pixelManager.pixelDone();
     }
+
     /**
-     * Prints a grid on top of the existing image without casting new rays.
-     * @param interval The size of each square in the grid (in pixels)
-     * @param color The color of the grid lines
-     * @return the camera object itself
+     * Prints a grid over the rendered image.
+     *
+     * @param interval pixel spacing between grid lines
+     * @param color    grid line colour
+     * @return this Camera for method chaining
      */
     public Camera printGrid(int interval, Color color) {
-        if (_imageWriter == null) {
+        if (_imageWriter == null)
             throw new MissingResourceException("ImageWriter is not set", Camera.class.getName(), "ImageWriter");
-        }
-        for (int i = 0; i < nY; i++) {
-            for (int j = 0; j < nX; j++) {
-                if (i % interval == 0 || j % interval == 0) {
+        for (int i = 0; i < nY; i++)
+            for (int j = 0; j < nX; j++)
+                if (i % interval == 0 || j % interval == 0)
                     _imageWriter.writePixel(j, i, color);
-                }
-            }
-        }
-        return this; // Supports method chaining
+        return this;
     }
+
     /**
-     * Delegates the image creation to the image writer.[cite: 1]
-     * @param fileName the name of the output file
+     * Delegates image file creation to the ImageWriter.
+     *
+     * @param fileName output file name
      */
     public void writeToImage(String fileName) {
-        if (_imageWriter == null) {
+        if (_imageWriter == null)
             throw new MissingResourceException("ImageWriter is not set", Camera.class.getName(), "ImageWriter");
-        }
         _imageWriter.writeToImage(fileName);
     }
 
-    /**
-     * Builder for Camera
-     */
+    // -------------------------------------------------------------------------
+    // Builder
+    // -------------------------------------------------------------------------
+
+    /** Builder for Camera using a fluent API. */
     public static class Builder {
         private Point location;
         private Vector vTo;
@@ -149,13 +192,14 @@ public class Camera implements Cloneable {
         private Integer nX;
         private Integer nY;
         private RayTracerBase _rayTracer;
+        private int threadsCount = 0;
+        private double printInterval = 0;
 
         public Builder setRayTracer(Scene scene, RayTracerType type) {
-            if (type == RayTracerType.SIMPLE) {
+            if (type == RayTracerType.SIMPLE)
                 this._rayTracer = new SimpleRayTracer(scene);
-            } else {
+            else
                 throw new IllegalArgumentException("Unsupported RayTracerType: " + type);
-            }
             return this;
         }
 
@@ -198,80 +242,89 @@ public class Camera implements Cloneable {
             return this;
         }
 
+        /**
+         * Configures multi-threading mode.
+         *
+         * @param threads 0 = single-threaded, -1 = parallel stream,
+         *                -2 = auto (cores − {@code SPARE_THREADS}), N>0 = N raw threads
+         */
+        public Builder setMultithreading(int threads) {
+            if (threads < -2)
+                throw new IllegalArgumentException("threads must be >= -2");
+            if (threads == -2) {
+                int cores = Runtime.getRuntime().availableProcessors();
+                threadsCount = cores <= 2 ? 1 : cores - SPARE_THREADS;
+            } else {
+                threadsCount = threads;
+            }
+            return this;
+        }
+
+        /**
+         * Enables periodic progress printing during rendering.
+         *
+         * @param interval seconds between progress prints (0 disables)
+         */
+        public Builder setDebugPrint(double interval) {
+            if (interval < 0)
+                throw new IllegalArgumentException("print interval must be >= 0");
+            printInterval = interval;
+            return this;
+        }
+
+        /** Constructs and returns the fully initialised Camera. */
         public Camera build() {
-            // check for required parameters and set defaults where needed
-            if (location == null) {
+            if (location == null)
                 throw new MissingResourceException("Camera location is missing", Camera.class.getName(), "location");
-            }
 
-            // Resolve direction
-            if (vTo == null) {
-                if (targetPoint != null) {
-                    vTo = targetPoint.subtract(location).normalize();
-                }
-            }
+            if (vTo == null && targetPoint != null)
+                vTo = targetPoint.subtract(location).normalize();
 
-            if (vTo == null) {
+            if (vTo == null)
                 throw new MissingResourceException("Camera direction is missing", Camera.class.getName(), "direction");
-            }
 
-            if (vUp == null) {
+            if (vUp == null)
                 vUp = Vector.AXIS_Y;
-            }
 
-            // check that vTo and vUp are not parallel
-            if (vpWidth == null || vpHeight == null || vpWidth <= 0 || vpHeight <= 0) {
+            if (vpWidth == null || vpHeight == null || vpWidth <= 0 || vpHeight <= 0)
                 throw new IllegalArgumentException("View plane size must be positive");
-            }
 
-            if (vpDistance == null || vpDistance <= 0) {
+            if (vpDistance == null || vpDistance <= 0)
                 throw new IllegalArgumentException("View plane distance must be positive");
-            }
 
             if (nX == null) nX = 1;
             if (nY == null) nY = 1;
 
-            if (nX <= 0 || nY <= 0) {
+            if (nX <= 0 || nY <= 0)
                 throw new IllegalArgumentException("Resolution must be positive");
-            }
 
-            // check if it is null
-            if (this._rayTracer == null) {
+            if (this._rayTracer == null)
                 this.setRayTracer(new Scene("test"), RayTracerType.SIMPLE);
-            }
 
-            // create
             Camera cam = new Camera();
-
-            // create the ImageWriter and assign it to the camera
             cam._imageWriter = new ImageWriter(nX, nY);
+            cam._rayTracer   = this._rayTracer;
 
-            // assign the RayTracer to the camera
-            cam._rayTracer = this._rayTracer;
-
-            // normalize direction vectors and compute the right vector
             vTo = vTo.normalize();
             vUp = vUp.normalize();
             Vector vRight = vTo.crossProduct(vUp).normalize();
 
-            cam.location = location;
-            cam.vTo = vTo;
-            cam.vUp = vUp;
-            cam.vRight = vRight;
-            cam.vpWidth = vpWidth;
-            cam.vpHeight = vpHeight;
-            cam.vpDistance = vpDistance;
-            cam.nX = nX;
-            cam.nY = nY;
-
-
-            cam.pc = location.add(vTo.scale(vpDistance));
-            cam.pixelWidth = vpWidth / nX;
+            cam.location    = location;
+            cam.vTo         = vTo;
+            cam.vUp         = vUp;
+            cam.vRight      = vRight;
+            cam.vpWidth     = vpWidth;
+            cam.vpHeight    = vpHeight;
+            cam.vpDistance  = vpDistance;
+            cam.nX          = nX;
+            cam.nY          = nY;
+            cam.pc          = location.add(vTo.scale(vpDistance));
+            cam.pixelWidth  = vpWidth  / nX;
             cam.pixelHeight = vpHeight / nY;
+            cam._threadsCount  = threadsCount;
+            cam._printInterval = printInterval;
 
-            // The camera is now fully initialized and ready to use
             return cam;
         }
     }
 }
-

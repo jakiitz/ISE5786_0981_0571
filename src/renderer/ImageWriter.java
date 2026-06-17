@@ -62,6 +62,6 @@ final class ImageWriter {
     * @param yIndex the pixel y-coordinate
     * @param color  the color to write
     */
-   void writePixel(int xIndex, int yIndex, Color color) { _image.setRGB(xIndex, yIndex, color.getColor().getRGB()); }
+   synchronized void writePixel(int xIndex, int yIndex, Color color) { _image.setRGB(xIndex, yIndex, color.getColor().getRGB()); }
 
 }

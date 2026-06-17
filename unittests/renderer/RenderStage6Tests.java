@@ -48,6 +48,8 @@ class RenderStage6Tests {
     private static final double RADIUS     = 50D;
 
     private static int          RESOLUTION = 1000;
+    /** Thread count: -2=auto raw threads, -1=parallel stream, 0=single-threaded */
+    private static final int    THREADS    = -2;
 
     /**
      * Build camera and render image with grid
@@ -60,6 +62,7 @@ class RenderStage6Tests {
                 .setLocation(Point.ZERO).setDirection(new Point(0, 0, -1), Vector.AXIS_Y) //
                 .setVpDistance(100).setVpSize(500, 500) //
                 .setRayTracer(scene, RayTracerType.SIMPLE) //
+                .setMultithreading(THREADS).setDebugPrint(1) //
                 .build() //
                 .renderImage() //
                 .printGrid(100, new Color(WHITE)) //
