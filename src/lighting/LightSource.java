@@ -3,6 +3,7 @@ package lighting;
 import primitives.Color;
 import primitives.Point;
 import primitives.Vector;
+import java.util.List;
 
 /**
  * Marker interface for light sources.
@@ -20,4 +21,14 @@ public interface LightSource {
      * @return the distance
      */
     double getDistance(Point p);
+
+    /**
+     * Gets a grid of points on the target area of the light source for Soft Shadows calculation.
+     * If the light source has no physical size (radius = 0), it returns a list with a single point.
+     * @param p The illuminated point on the geometry.
+     * @return A list of points distributed on the light's surface area.
+     */
+    default List<Point> getTargetAreaPoints(Point p) {
+        return null;
+    }
 }

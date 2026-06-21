@@ -10,7 +10,7 @@ import java.util.Objects;
  * It defines a method to find the intersection points of a ray with the geometry.
  */
 public abstract class Intersectable {
-
+    public BoundingBox box = null;
     /**
      * Nested class representing an intersection between a ray and a geometry.
      */
@@ -66,6 +66,10 @@ public abstract class Intersectable {
      * @return list of intersections (null if no intersections)
      */
     public final List<Intersection> calcIntersections(Ray ray) {
+        // אם יש קופסה, והקרן לא פוגעת בה - דלג (חסכנו המון זמן!)
+        if (box != null && !box.intersect(ray)) {
+            return null;
+        }
         return calcIntersectionsHelper(ray);
     }
 

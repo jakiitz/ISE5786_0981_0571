@@ -11,7 +11,7 @@ import scene.Scene;
 class BuildSceneTest {
 
     /** Thread count: -2=auto raw threads, -1=parallel stream, 0=single-threaded */
-    private static final int     THREADS = 0;
+    private static final int     THREADS = -2;
 
     private final Scene          scene  = new Scene("Build Scene");
     private final Camera.Builder camera = Camera.getBuilder()
@@ -317,12 +317,36 @@ class BuildSceneTest {
 
         // 1. ה-SpotLight המרכזי (אור משימה - ממוקד לשולחן ולכדורים השקופים)
         // גוון חם, עוצמה טובה שמייצרת דרמה במרכז החדר
+        // 1. ה-SpotLight המרכזי
         scene.lights.add(
                 new SpotLight(
                         new Color(130, 115, 85),
                         new Point(0, 95, -150),
                         new Vector(0, -1, 0))
+                        .setRadius(5)
+                        .setGridSize(9)
                         .setKl(0.0004).setKq(0.000008)
+        );
+
+// 2. ה-PointLight המרכזי
+        scene.lights.add(
+                new PointLight(
+                        new Color(30, 28, 25),
+                        new Point(0, 95, -150))
+                        .setRadius(6)
+                        .setGridSize(9)
+                        .setKl(0.0003).setKq(0.000005)
+        );
+
+// 3. ספוט מעל הקומודה
+        scene.lights.add(
+                new SpotLight(
+                        new Color(50, 45, 35),
+                        new Point(-180, 130, -210),
+                        new Vector(0, -1, 0))
+                        .setRadius(3)
+                        .setGridSize(9)
+                        .setKl(0.0005).setKq(0.00001)
         );
 
         // 2. ה-PointLight המרכזי (אור מילוי רך - מאיר את הקירות והחלל הכללי)
@@ -343,14 +367,14 @@ class BuildSceneTest {
                         new Vector(0, -1, 0)) // מכוון ישירות למטה אל הקומודה והכדור
                         .setKl(0.0005).setKq(0.00001)
         );
-
+        scene.geometries.buildBVH();
         // ── CAMERA ──
         camera
                 .setLocation(new Point(-60, 110, 410))
                 .setDirection(new Point(60, -50, -200), Vector.AXIS_Y)
                 .setVpDistance(180)
                 .setVpSize(240, 160)
-                .setResolution(4500, 3000)
+                .setResolution(4500, 300)
                 .build()
                 .renderImage()
                 .writeToImage("buildScene");

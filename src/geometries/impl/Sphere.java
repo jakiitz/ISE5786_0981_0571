@@ -4,7 +4,7 @@ import geometries.api.Intersectable;
 import primitives.*;
 
 import java.util.List;
-
+import geometries.api.BoundingBox;
 import static primitives.Util.alignZero;
 
 
@@ -20,10 +20,23 @@ public final class Sphere extends RadialGeometry {
      * @param center center point of the sphere
      * @param radius radius of the sphere
      */
-    public Sphere(Point center, double radius) {
-        super(radius);
-        _center = center;
-    }
+     public Sphere(Point center, double radius) {
+         super(radius);
+         _center = center;
+
+         // גישה לקואורדינטות דרך getXYZ() והערכים הפנימיים _d1, _d2, _d3
+         var xyz = center.getXYZ();
+         double x = xyz._d1();
+         double y = xyz._d2();
+         double z = xyz._d3();
+
+         // עכשיו נבנה את ה-BoundingBox עם הערכים האלו
+         this.box = new BoundingBox(
+                 x - radius, x + radius,
+                 y - radius, y + radius,
+                 z - radius, z + radius
+         );
+     }
 
     @Override
     public Vector getNormal(Point point) {
