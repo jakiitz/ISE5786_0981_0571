@@ -210,6 +210,14 @@ class BuildSceneTest {
                                 .setKD(0.7).setKS(0.08).setShininess(10))
         );
 
+        // ── FRONT WALL — warm ivory (behind the camera; visible in reflections)
+        scene.geometries.add(
+                new Plane(new Point(0, 0, 430), new Vector(0, 0, -1))
+                        .setEmission(new Color(175, 162, 140))
+                        .setMaterial(new Material()
+                                .setKD(0.7).setKS(0.08).setShininess(10))
+        );
+
         // ── MIRROR 1 — in the back-right corner, angled 45°
         scene.geometries.add(
                 new Plane(new Point(220, 0, -380), new Vector(-1, 0, 1))
@@ -323,7 +331,7 @@ class BuildSceneTest {
                         new Color(130, 115, 85),
                         new Point(0, 95, -150),
                         new Vector(0, -1, 0))
-                        .setRadius(5)
+                        .setRadius(25)
                         .setGridSize(9)
                         .setKl(0.0004).setKq(0.000008)
         );
@@ -333,7 +341,7 @@ class BuildSceneTest {
                 new PointLight(
                         new Color(30, 28, 25),
                         new Point(0, 95, -150))
-                        .setRadius(6)
+                        .setRadius(25)
                         .setGridSize(9)
                         .setKl(0.0003).setKq(0.000005)
         );
@@ -344,29 +352,11 @@ class BuildSceneTest {
                         new Color(50, 45, 35),
                         new Point(-180, 130, -210),
                         new Vector(0, -1, 0))
-                        .setRadius(3)
+                        .setRadius(15)
                         .setGridSize(9)
                         .setKl(0.0005).setKq(0.00001)
         );
 
-        // 2. ה-PointLight המרכזי (אור מילוי רך - מאיר את הקירות והחלל הכללי)
-        // הורדנו מעט עוצמה (מ-45 ל-30) כדי שלא ישרוף את מה שעל השולחן
-        scene.lights.add(
-                new PointLight(
-                        new Color(30, 28, 25),
-                        new Point(0, 95, -150))
-                        .setKl(0.0003).setKq(0.000005)
-        );
-
-        // 3. מקור אור חדש: ספוט עדין מעל הקומודה והכדור המתכתי (צד שמאל)
-        // המטרה: לייצר השתקפויות יפות (Highlights) על החומרים המבריקים בצד שמאל
-        scene.lights.add(
-                new SpotLight(
-                        new Color(50, 45, 35), // אור רך וחם
-                        new Point(-180, 130, -210), // ממוקם גבוה מעל הקומודה
-                        new Vector(0, -1, 0)) // מכוון ישירות למטה אל הקומודה והכדור
-                        .setKl(0.0005).setKq(0.00001)
-        );
         scene.geometries.buildBVH();
         // ── CAMERA ──
         camera
@@ -374,7 +364,7 @@ class BuildSceneTest {
                 .setDirection(new Point(60, -50, -200), Vector.AXIS_Y)
                 .setVpDistance(180)
                 .setVpSize(240, 160)
-                .setResolution(4500, 300)
+                .setResolution(1500, 1000)
                 .build()
                 .renderImage()
                 .writeToImage("buildScene");
