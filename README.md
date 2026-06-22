@@ -68,5 +68,6 @@ public class Main {
 Here is a showcase of scenes rendered using our engine, demonstrating various lighting models, reflections, and complex geometries:
 
 ### Final 4K Render (Showcasing Soft Shadows & BVH)
-<img width="1500" height="1000" alt="buildScene" src="https://github.com/user-attachments/assets/aa9f750b-f985-4f5e-b7a3-14da6cf98b83" />
+<img width="1500" height="1000" alt="buildScene" src="https://github.com/user-attachments/assets/7ac17914-62de-460e-a695-cc54b2b0fe32" />
+
 '''
