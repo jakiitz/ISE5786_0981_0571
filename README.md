@@ -51,6 +51,8 @@ public class Main {
     }
 }
 
+```
+
 ## Project Structure
 | Directory | Description |
 | :--- | :--- |
@@ -69,5 +71,5 @@ Here is a showcase of scenes rendered using our engine, demonstrating various li
 
 ### Final 4K Render (Showcasing Soft Shadows & BVH)
 <img width="1500" height="1000" alt="buildScene" src="https://github.com/user-attachments/assets/7ac17914-62de-460e-a695-cc54b2b0fe32" />
-```
+
 תת
