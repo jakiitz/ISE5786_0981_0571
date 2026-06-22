@@ -50,6 +50,7 @@ public class Main {
         camera.renderImage().writeToImage();
     }
 }
+
 ## Project Structure
 | Directory | Description |
 | :--- | :--- |
@@ -68,4 +69,4 @@ Here is a showcase of scenes rendered using our engine, demonstrating various li
 
 ### Final 4K Render (Showcasing Soft Shadows & BVH)
 <img width="1500" height="1000" alt="buildScene" src="https://github.com/user-attachments/assets/aa9f750b-f985-4f5e-b7a3-14da6cf98b83" />
-
+'''
