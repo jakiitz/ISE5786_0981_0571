@@ -12,15 +12,26 @@ This engine supports advanced rendering techniques to generate realistic 3D scen
 * **Core Geometries:** Sphere, Plane, Triangle, Polygon, Cylinder, and Tube.
 * **Lighting Models:** Ambient, Directional, Point, and Spot lights with Phong reflection model.
 
-## Performance Benchmarks
-* **Resolution:** 4500x3000
-* **Soft Shadows:** 9x9 Grid
-* **Threads:** All available cores (`setMultithreading(-1)`)
+## Performance & Feature Comparisons
 
-| Configuration | Render Time | Performance Gain |
-| :--- | :--- | :--- |
-| Base Engine (No BVH) | ~120 minutes | - |
-| **With BVH Optimization** | **~7.5 minutes** | **~16x Faster** |
+To demonstrate the engine's capabilities, here are theoretical and practical comparisons of rendering a high-resolution scene (4500x3000) with and without our core engine features:
+
+### 1. Bounding Volume Hierarchy (BVH) Optimization
+BVH optimizes the intersection calculations by changing the time complexity from O(N) to O(log N). It groups finite objects into a binary tree of Axis-Aligned Bounding Boxes (AABB).
+
+* **Without BVH (Naive Ray Tracing):** Every single ray checks for an intersection with every object. Render time: ~120 minutes.
+* **With BVH:** Rays check for intersections against the bounding boxes first. Render time: ~7.5 minutes (~16x Faster).
+
+
+### 2. Soft Shadows vs. Hard Shadows
+
+* **Without Soft Shadows (Point Light):** The engine treats the light source as an infinitely small point. The result is a shadow with perfectly sharp, artificial edges.
+* **With Soft Shadows (Area Light):** The engine simulates a light source with physical size by spreading a grid of target points. The result is a highly realistic shadow with gradual blurring at the edges.
+
+| Before | After |
+| :---: | :---: |
+| <img width="450" height="300" alt="WhatsApp Image 2026-06-22 at 16 12 43" src="https://github.com/user-attachments/assets/59bbfd2a-dfe4-46ed-ad85-8745cffa884b" />| <img width="450" height="300" alt="WhatsApp Image 2026-06-22 at 16 15 42" src="https://github.com/user-attachments/assets/d72b4e6e-743e-4669-b3dd-a380eeb3f321" /> |
+
 
 ## Quick Start
 ```java
