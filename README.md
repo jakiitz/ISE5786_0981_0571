@@ -12,9 +12,60 @@ This engine supports advanced rendering techniques to generate realistic 3D scen
 * **Core Geometries:** Sphere, Plane, Triangle, Polygon, Cylinder, and Tube.
 * **Lighting Models:** Ambient, Directional, Point, and Spot lights with Phong reflection model.
 
-## Installation & Setup
-1. **Prerequisites:** Java 11 or higher, Maven.
-2. **Clone the repository:**
-   ```bash
-   git clone [https://github.com/](https://github.com/)[Your-Username]/ISE5786_0981_0571.git
-   cd ISE5786_0981_0571
+## Performance Benchmarks
+* **Resolution:** 4500x3000
+* **Soft Shadows:** 9x9 Grid
+* **Threads:** All available cores (`setMultithreading(-1)`)
+
+| Configuration | Render Time | Performance Gain |
+| :--- | :--- | :--- |
+| Base Engine (No BVH) | ~120 minutes | - |
+| **With BVH Optimization** | **~7.5 minutes** | **~16x Faster** |
+
+## Quick Start
+```java
+import geometries.impl.*;
+import lighting.*;
+import primitives.*;
+import renderer.*;
+import scene.Scene;
+
+public class Main {
+    public static void main(String[] args) {
+        Scene scene = new Scene("Main Scene");
+
+        ImageWriter writer = new ImageWriter("Render_4K", 4500, 3000);
+
+        Camera camera = Camera.getBuilder()
+            .setLocation(new Point(0, 0, 1000))
+            .setDirection(new Vector(0, 0, -1), new Vector(0, 1, 0))
+            .setVpSize(200, 150)
+            .setVpDistance(1000)
+            .setImageWriter(writer)
+            .setRayTracer(new SimpleRayTracer(scene))
+            .setMultithreading(-1) 
+            .setGridSize(9)        
+            .build();
+
+        camera.renderImage().writeToImage();
+    }
+}
+## Project Structure
+| Directory | Description |
+| :--- | :--- |
+| `src/geometries/` | Intersectable shapes and BVH implementation. |
+| `src/lighting/` | Light sources and illumination models. |
+| `src/primitives/` | Core mathematical constructs. |
+| `src/renderer/` | Camera, RayTracer pipeline, ImageWriter. |
+| `src/scene/` | Scene definition holding geometries and lighting. |
+| `unittests/` | Comprehensive JUnit test suite. |
+
+
+
+## Gallery
+
+Here is a showcase of scenes rendered using our engine, demonstrating various lighting models, reflections, and complex geometries:
+
+### Final 4K Render (Showcasing Soft Shadows & BVH)
+<img width="1500" height="1000" alt="buildScene" src="https://github.com/user-attachments/assets/aa9f750b-f985-4f5e-b7a3-14da6cf98b83" />
+
