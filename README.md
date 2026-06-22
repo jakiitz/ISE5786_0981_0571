@@ -24,9 +24,8 @@ BVH optimizes the intersection calculations by changing the time complexity from
 
 
 ### 2. Soft Shadows vs. Hard Shadows
-
-* **Without Soft Shadows (Point Light):** The engine treats the light source as an infinitely small point. The result is a shadow with perfectly sharp, artificial edges.
-* **With Soft Shadows (Area Light):** The engine simulates a light source with physical size by spreading a grid of target points. The result is a highly realistic shadow with gradual blurring at the edges.
+* **Without Soft Shadows (Point Light):** The light source is an infinitely small point. A single ray determines if a pixel is fully shadowed or fully lit, creating sharp, artificial edges.
+* **With Soft Shadows (Area Light):** The light source is simulated as a grid of points. Multiple rays are cast, and the shadow intensity is calculated based on the partial percentage of unblocked rays reaching the light, creating realistic, soft edges (penumbra).
 
 | Before | After |
 | :---: | :---: |
