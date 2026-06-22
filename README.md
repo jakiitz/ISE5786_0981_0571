@@ -1,3 +1,4 @@
+'''
 # Java 3D Ray Tracer
 
 A powerful and efficient Java-based 3D Ray Tracing engine. Built with a focus on performance, extensible architecture (SOLID principles), and rendering high-quality images.
